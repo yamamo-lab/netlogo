@@ -12,68 +12,113 @@ to setup
   ; 50=正常時の基準値（相対値）
   set trh 50
   set tsh 50
-  set thyroxine チロキシン初期値
+  set thyroxine 50
 
   reset-ticks
 end
 
+
 to go
+  ; 4時間でシミュレーションを終了
   if ticks >= 40 [ stop ]
 
   ; 1 tick = 0.1時間 = 6分
   let dt 0.1
 
   ; 各段階の応答時間（時間）
+  ; ここでの値は半減期ではなく、刺激に対する応答速度を表す
   let tau-trh 0.20
   let tau-tsh 0.35
   let tau-t4  0.50
 
-  ; 寒冷刺激
-  let cold 寒冷刺激 / 100
+  ; スライダー値を0～1に変換
+  let cold       寒冷刺激 / 100
+  let hypo-func  視床下部機能 / 100
+  let pit-func   脳下垂体前葉機能 / 100
+  let thyr-func  甲状腺機能 / 100
 
+  ; ----------------------------------------
   ; 視床下部
+  ; 寒冷刺激でTRH分泌を促進
+  ; チロキシン増加でTRH分泌を抑制
+  ; ----------------------------------------
   let trh-target
-    50
-    + 20 * cold
-    - 0.25 * (thyroxine - 50)
+    hypo-func *
+    (50
+     + 20 * cold
+     - 0.25 * (thyroxine - 50))
+
   set trh-target clip trh-target
 
+
+  ; ----------------------------------------
   ; 脳下垂体前葉
+  ; TRHでTSH分泌を促進
+  ; チロキシン増加でTSH分泌を抑制
+  ; ----------------------------------------
   let tsh-target
-    50
-    + 2.0 * (trh - 50)
-    - 0.20 * (thyroxine - 50)
+    pit-func *
+    (50
+     + 2.0 * (trh - 50)
+     - 0.20 * (thyroxine - 50))
+
   set tsh-target clip tsh-target
 
+
+  ; ----------------------------------------
   ; 甲状腺
+  ; TSHによってチロキシン分泌を促進
+  ; 下流で信号を増幅
+  ; ----------------------------------------
   let thyroxine-target
-    50
-    + 1.5 * (tsh - 50)
+    thyr-func *
+    (50
+     + 1.5 * (tsh - 50))
+
   set thyroxine-target clip thyroxine-target
 
-  ; 微分方程式
+
+  ; ----------------------------------------
+  ; 微分方程式をEuler法で計算
+  ;
+  ; dX/dt = (目標値 - 現在値) / 時定数
+  ; ----------------------------------------
   set trh
-    clip (trh + dt / tau-trh * (trh-target - trh))
+    clip (
+      trh
+      + dt / tau-trh * (trh-target - trh)
+    )
 
   set tsh
-    clip (tsh + dt / tau-tsh * (tsh-target - tsh))
+    clip (
+      tsh
+      + dt / tau-tsh * (tsh-target - tsh)
+    )
 
   set thyroxine
-    clip (thyroxine + dt / tau-t4 * (thyroxine-target - thyroxine))
+    clip (
+      thyroxine
+      + dt / tau-t4 * (thyroxine-target - thyroxine)
+    )
 
   tick
 end
 
+
 to-report clip [x]
   report max (list 0 (min (list 100 x)))
-end
-
-]]></code>
+end]]></code>
   <widgets>
     <view x="375" wrappingAllowedX="true" y="30" frameRate="30.0" minPycor="-16" height="60" showTickCounter="true" patchSize="1.7" fontSize="10" wrappingAllowedY="true" width="60" tickCounterLabel="ticks" maxPycor="16" updateMode="0" maxPxcor="16" minPxcor="-16"></view>
     <button x="35" y="25" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="55" display="初期化">setup</button>
     <button x="110" y="25" height="40" disableUntilTicks="false" forever="true" kind="Observer" width="95" display="開始／停止">go</button>
-    <slider x="50" step="10" y="75" max="100" width="250" display="寒冷刺激" height="50" min="0" direction="Horizontal" default="0.0" variable="寒冷刺激"></slider>
+    <slider x="50" step="10" y="75" max="100" width="250" display="寒冷刺激" height="50" min="0" direction="Horizontal" default="100.0" variable="寒冷刺激"></slider>
+    <slider x="50" step="10" y="135" max="100" width="250" display="視床下部機能" height="50" min="0" direction="Horizontal" default="100.0" variable="視床下部機能" units="%"></slider>
+    <monitor x="80" precision="1" y="185" height="60" fontSize="11" width="175" display="甲状腺刺激ホルモン放出ホルモン">trh</monitor>
+    <slider x="50" step="10" y="255" max="100" width="250" display="脳下垂体前葉機能" height="50" min="0" direction="Horizontal" default="100.0" variable="脳下垂体前葉機能" units="%"></slider>
+    <monitor x="80" precision="1" y="305" height="60" fontSize="11" width="175" display="甲状腺刺激ホルモン">tsh</monitor>
+    <monitor x="80" precision="1" y="420" height="60" fontSize="11" width="175" display="チロキシン">thyroxine</monitor>
+    <slider x="45" step="10" y="370" max="100" width="250" display="甲状腺機能" height="50" min="0" direction="Horizontal" default="100.0" variable="甲状腺機能" units="%"></slider>
     <plot x="330" autoPlotX="false" yMax="100.0" autoPlotY="false" yAxis="量（相対値）" y="5" xMin="0.0" height="175" legend="false" xMax="4.0" yMin="0.0" width="545" xAxis="時間（時）" display="甲状腺刺激ホルモン放出ホルモン">
       <setup></setup>
       <update></update>
@@ -98,11 +143,6 @@ end
         <update>plotxy (ticks * 0.1) thyroxine</update>
       </pen>
     </plot>
-    <monitor x="80" precision="1" y="380" height="60" fontSize="11" width="175" display="チロキシン">thyroxine</monitor>
-    <slider x="50" step="10" y="155" max="80" width="250" display="チロキシン初期値" height="50" min="20" direction="Horizontal" default="50.0" variable="チロキシン初期値"></slider>
-    <monitor x="80" precision="1" y="305" height="60" fontSize="11" width="175" display="甲状腺刺激ホルモン">tsh</monitor>
-    <monitor x="80" precision="1" y="230" height="60" fontSize="11" width="175" display="甲状腺刺激ホルモン放出ホルモン">trh</monitor>
-    <note x="140" y="160" backgroundDark="0" fontSize="12" width="150" markdown="false" height="25" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">正常値=50 （相対値）</note>
   </widgets>
   <info>## WHAT IS IT?
 
