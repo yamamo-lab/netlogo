@@ -432,10 +432,7 @@ end
 ; Copyright 2020 Uri Wilensky.
 ; See Info tab for full copyright and license.]]></code>
   <widgets>
-    <view x="644" wrappingAllowedX="false" y="58" frameRate="30.0" minPycor="-36" height="452" showTickCounter="true" patchSize="6.143" fontSize="10" wrappingAllowedY="false" width="219" tickCounterLabel="ticks" maxPycor="36" updateMode="1" maxPxcor="17" minPxcor="-17"></view>
-    <note x="825" y="20" backgroundDark="0" fontSize="14" width="80" markdown="false" height="31" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">毛細血管</note>
-    <note x="600" y="20" backgroundDark="0" fontSize="14" width="80" markdown="false" height="31" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">毛細血管</note>
-    <note x="720" y="20" backgroundDark="0" fontSize="14" width="70" markdown="false" height="30" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">細尿管</note>
+    <view x="644" wrappingAllowedX="false" y="58" frameRate="30.0" minPycor="-32" height="403" showTickCounter="true" patchSize="6.143" fontSize="10" wrappingAllowedY="false" width="219" tickCounterLabel="ticks" maxPycor="32" updateMode="1" maxPxcor="17" minPxcor="-17"></view>
     <button x="410" y="30" height="50" disableUntilTicks="false" forever="false" kind="Observer" width="80" display="設定">setup</button>
     <button x="500" y="30" height="50" disableUntilTicks="true" forever="true" kind="Observer" width="85" display="実行">go</button>
     <input x="20" multiline="false" y="25" height="60" variable="尿量" type="number" width="100">1.4</input>
@@ -446,7 +443,6 @@ end
     <note x="25" y="115" backgroundDark="0" fontSize="14" width="125" markdown="false" height="31" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">血しょう濃度 (%)</note>
     <input x="25" multiline="false" y="169" height="60" variable="タンパク質" type="number" width="125">7.0</input>
     <input x="25" multiline="false" y="249" height="60" variable="グルコース" type="number" width="125">0.1</input>
-    <input x="25" multiline="false" y="329" height="60" variable="Na+" type="number" width="125">0.3</input>
     <input x="25" multiline="false" y="407" height="60" variable="尿素" type="number" width="130">0.03</input>
     <note x="176" y="115" backgroundDark="0" fontSize="14" width="125" markdown="false" height="31" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">ろ過量 (g/日)</note>
     <monitor x="176" precision="1" y="407" height="60" fontSize="14" width="125" display="　">urea-filtered-amount</monitor>
@@ -470,6 +466,10 @@ end
 ]]]></monitor>
     <monitor x="480" precision="1" y="168" height="60" fontSize="14" width="125" display="　">0</monitor>
     <monitor x="327" precision="1" y="168" height="60" fontSize="14" width="125" display="　">0</monitor>
+    <input x="25" multiline="false" y="329" height="60" variable="Na+" type="number" width="125">0.3</input>
+    <note x="720" y="21" backgroundDark="0" fontSize="14" width="70" markdown="false" height="30" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">細尿管</note>
+    <note x="610" y="20" backgroundDark="0" fontSize="14" width="80" markdown="false" height="31" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">毛細血管</note>
+    <note x="815" y="20" backgroundDark="0" fontSize="14" width="80" markdown="false" height="31" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">毛細血管</note>
   </widgets>
   <info><![CDATA[## WHAT IS IT?
 
