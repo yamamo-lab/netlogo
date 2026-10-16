@@ -439,37 +439,37 @@ end
     <button x="410" y="30" height="50" disableUntilTicks="false" forever="false" kind="Observer" width="80" display="設定">setup</button>
     <button x="500" y="30" height="50" disableUntilTicks="true" forever="true" kind="Observer" width="85" display="実行">go</button>
     <input x="20" multiline="false" y="25" height="60" variable="尿量" type="number" width="100">1.4</input>
-    <monitor x="480" precision="1" y="168" height="60" fontSize="14" width="125">0</monitor>
-    <monitor x="480" precision="1" y="248" height="60" fontSize="14" width="125"><![CDATA[count molecules with [
-  color = orange and
-  ycor <= min-pycor
-]]]></monitor>
-    <monitor x="480" precision="1" y="328" height="60" fontSize="14" width="125"><![CDATA[count molecules with [
-  color = violet and
-  ycor <= min-pycor
-]]]></monitor>
-    <monitor x="480" precision="1" y="407" height="60" fontSize="14" width="120"><![CDATA[(count molecules with [
-  color = grey and
-  ycor <= min-pycor
-]) * 0.1]]></monitor>
     <note x="480" y="115" backgroundDark="0" fontSize="14" width="125" markdown="false" height="30" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">尿量 (g/日)</note>
-    <monitor x="327" precision="1" y="168" height="60" fontSize="14" width="125">0</monitor>
-    <monitor x="327" precision="1" y="248" height="60" fontSize="14" width="125">glucose-molecules-absorbed</monitor>
-    <monitor x="327" precision="1" y="328" height="60" fontSize="14" width="125">sodium-molecules-absorbed</monitor>
-    <monitor x="327" precision="1" y="407" height="60" fontSize="14" width="125">urea-molecules-absorbed * 0.1</monitor>
     <note x="327" y="115" backgroundDark="0" fontSize="14" width="125" markdown="false" height="30" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">再吸収量 (g/日)</note>
     <monitor x="130" precision="17" y="25" height="60" units="倍" fontSize="14" width="150" display="イヌリン濃縮率（固定値）">120</monitor>
     <monitor x="295" precision="1" y="25" height="60" units="L/日" fontSize="14" width="100" display="原尿量">filtrate-volume</monitor>
     <note x="25" y="115" backgroundDark="0" fontSize="14" width="125" markdown="false" height="31" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">血しょう濃度 (%)</note>
-    <input x="25" multiline="false" y="169" height="60" variable="タンパク質" type="number" width="125">5.0</input>
-    <input x="25" multiline="false" y="249" height="60" variable="グルコース" type="number" width="125">0.6</input>
-    <input x="25" multiline="false" y="329" height="60" variable="Na+" type="number" width="125">0.4</input>
+    <input x="25" multiline="false" y="169" height="60" variable="タンパク質" type="number" width="125">7.0</input>
+    <input x="25" multiline="false" y="249" height="60" variable="グルコース" type="number" width="125">0.1</input>
+    <input x="25" multiline="false" y="329" height="60" variable="Na+" type="number" width="125">0.3</input>
     <input x="25" multiline="false" y="407" height="60" variable="尿素" type="number" width="130">0.03</input>
     <note x="176" y="115" backgroundDark="0" fontSize="14" width="125" markdown="false" height="31" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">ろ過量 (g/日)</note>
-    <monitor x="176" precision="1" y="169" height="60" fontSize="14" width="125">0</monitor>
-    <monitor x="176" precision="1" y="249" height="60" fontSize="14" width="125">glucose-filtered-amount</monitor>
-    <monitor x="176" precision="1" y="329" height="60" fontSize="14" width="125">sodium-filtered-amount</monitor>
     <monitor x="176" precision="1" y="407" height="60" fontSize="14" width="125" display="　">urea-filtered-amount</monitor>
+    <monitor x="176" precision="1" y="329" height="60" fontSize="14" width="125" display="　">sodium-filtered-amount</monitor>
+    <monitor x="176" precision="1" y="249" height="60" fontSize="14" width="125" display="　">glucose-filtered-amount</monitor>
+    <monitor x="176" precision="1" y="169" height="60" fontSize="14" width="125" display="　">0</monitor>
+    <monitor x="327" precision="1" y="248" height="60" fontSize="14" width="125" display="　">glucose-molecules-absorbed</monitor>
+    <monitor x="327" precision="1" y="328" height="60" fontSize="14" width="125" display="　">sodium-molecules-absorbed</monitor>
+    <monitor x="327" precision="1" y="407" height="60" fontSize="14" width="125" display="　">urea-molecules-absorbed * 0.1</monitor>
+    <monitor x="480" precision="1" y="407" height="60" fontSize="14" width="120" display="　"><![CDATA[(count molecules with [
+  color = grey and
+  ycor <= min-pycor
+]) * 0.1]]></monitor>
+    <monitor x="480" precision="1" y="328" height="60" fontSize="14" width="125" display="　"><![CDATA[count molecules with [
+  color = violet and
+  ycor <= min-pycor
+]]]></monitor>
+    <monitor x="480" precision="1" y="248" height="60" fontSize="14" width="125" display="　"><![CDATA[count molecules with [
+  color = orange and
+  ycor <= min-pycor
+]]]></monitor>
+    <monitor x="480" precision="1" y="168" height="60" fontSize="14" width="125" display="　">0</monitor>
+    <monitor x="327" precision="1" y="168" height="60" fontSize="14" width="125" display="　">0</monitor>
   </widgets>
   <info><![CDATA[## WHAT IS IT?
 
