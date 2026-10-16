@@ -469,7 +469,7 @@ end
     <monitor x="176" precision="1" y="169" height="60" fontSize="14" width="125">0</monitor>
     <monitor x="176" precision="1" y="249" height="60" fontSize="14" width="125">glucose-filtered-amount</monitor>
     <monitor x="176" precision="1" y="329" height="60" fontSize="14" width="125">sodium-filtered-amount</monitor>
-    <monitor x="176" precision="1" y="407" height="60" fontSize="14" width="125">urea-filtered-amount</monitor>
+    <monitor x="176" precision="1" y="407" height="60" fontSize="14" width="125" display="　">urea-filtered-amount</monitor>
   </widgets>
   <info><![CDATA[## WHAT IS IT?
 
