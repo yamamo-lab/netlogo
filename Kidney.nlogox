@@ -118,8 +118,8 @@ to go
   tick
 end
 
+; 尿素粒子を追加する
 to add-urea-molecules
-
   ; 1粒子 = 0.1 g
   create-molecules round (urea-filtered-amount * 10) [
     setxy (random-float (1.25 * max-pxcor) - ((1.25 * max-pxcor) / 2))
@@ -127,8 +127,11 @@ to add-urea-molecules
 
     set shape "dot"
     set color grey
+  
+  if 表示モード != "すべて表示" and 表示モード != "尿素のみ表示" [
+    hide-turtle
   ]
-
+]
 end
 
 ; グルコース粒子を追加する
@@ -142,6 +145,11 @@ to add-glucose-molecules
 
     set shape "dot"
     set color orange
+    
+    if 表示モード != "すべて表示" and 表示モード != "グルコースのみ表示" [
+      hide-turtle
+    ]
+    
   ]
 
 end
@@ -156,6 +164,11 @@ to add-sodium-molecules
 
     set shape "dot"
     set color violet
+    
+    if 表示モード != "すべて表示" and 表示モード != "Na＋のみ表示" [
+      hide-turtle
+    ]
+
   ]
 
 end
@@ -433,43 +446,53 @@ end
 ; See Info tab for full copyright and license.]]></code>
   <widgets>
     <view x="644" wrappingAllowedX="false" y="58" frameRate="30.0" minPycor="-32" height="403" showTickCounter="true" patchSize="6.143" fontSize="10" wrappingAllowedY="false" width="219" tickCounterLabel="ticks" maxPycor="32" updateMode="1" maxPxcor="17" minPxcor="-17"></view>
-    <button x="410" y="30" height="50" disableUntilTicks="false" forever="false" kind="Observer" width="80" display="設定">setup</button>
-    <button x="500" y="30" height="50" disableUntilTicks="true" forever="true" kind="Observer" width="85" display="実行">go</button>
-    <input x="20" multiline="false" y="25" height="60" variable="尿量" type="number" width="100">1.4</input>
-    <note x="480" y="115" backgroundDark="0" fontSize="14" width="125" markdown="false" height="30" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">尿量 (g/日)</note>
-    <note x="327" y="115" backgroundDark="0" fontSize="14" width="125" markdown="false" height="30" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">再吸収量 (g/日)</note>
-    <monitor x="130" precision="17" y="25" height="60" units="倍" fontSize="14" width="150" display="イヌリン濃縮率（固定値）">120</monitor>
-    <monitor x="295" precision="1" y="25" height="60" units="L/日" fontSize="14" width="100" display="原尿量">filtrate-volume</monitor>
-    <note x="25" y="115" backgroundDark="0" fontSize="14" width="125" markdown="false" height="31" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">血しょう濃度 (%)</note>
-    <input x="25" multiline="false" y="169" height="60" variable="タンパク質" type="number" width="125">7.0</input>
-    <input x="25" multiline="false" y="249" height="60" variable="グルコース" type="number" width="125">0.1</input>
-    <input x="25" multiline="false" y="407" height="60" variable="尿素" type="number" width="130">0.03</input>
-    <note x="176" y="115" backgroundDark="0" fontSize="14" width="125" markdown="false" height="31" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">ろ過量 (g/日)</note>
-    <monitor x="176" precision="1" y="407" height="60" fontSize="14" width="125" display="　">urea-filtered-amount</monitor>
-    <monitor x="176" precision="1" y="329" height="60" fontSize="14" width="125" display="　">sodium-filtered-amount</monitor>
-    <monitor x="176" precision="1" y="249" height="60" fontSize="14" width="125" display="　">glucose-filtered-amount</monitor>
-    <monitor x="176" precision="1" y="169" height="60" fontSize="14" width="125" display="　">0</monitor>
-    <monitor x="327" precision="1" y="248" height="60" fontSize="14" width="125" display="　">glucose-molecules-absorbed</monitor>
-    <monitor x="327" precision="1" y="328" height="60" fontSize="14" width="125" display="　">sodium-molecules-absorbed</monitor>
-    <monitor x="327" precision="1" y="407" height="60" fontSize="14" width="125" display="　">urea-molecules-absorbed * 0.1</monitor>
-    <monitor x="480" precision="1" y="407" height="60" fontSize="14" width="120" display="　"><![CDATA[(count molecules with [
-  color = grey and
-  ycor <= min-pycor
-]) * 0.1]]></monitor>
-    <monitor x="480" precision="1" y="328" height="60" fontSize="14" width="125" display="　"><![CDATA[count molecules with [
-  color = violet and
-  ycor <= min-pycor
-]]]></monitor>
-    <monitor x="480" precision="1" y="248" height="60" fontSize="14" width="125" display="　"><![CDATA[count molecules with [
-  color = orange and
-  ycor <= min-pycor
-]]]></monitor>
-    <monitor x="480" precision="1" y="168" height="60" fontSize="14" width="125" display="　">0</monitor>
-    <monitor x="327" precision="1" y="168" height="60" fontSize="14" width="125" display="　">0</monitor>
-    <input x="25" multiline="false" y="329" height="60" variable="Na+" type="number" width="125">0.3</input>
     <note x="720" y="21" backgroundDark="0" fontSize="14" width="70" markdown="false" height="30" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">細尿管</note>
     <note x="610" y="20" backgroundDark="0" fontSize="14" width="80" markdown="false" height="31" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">毛細血管</note>
     <note x="815" y="20" backgroundDark="0" fontSize="14" width="80" markdown="false" height="31" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">毛細血管</note>
+    <input x="45" multiline="false" y="397" height="60" variable="尿素" type="number" width="130">0.03</input>
+    <monitor x="196" precision="1" y="397" height="60" fontSize="14" width="125" display="　">urea-filtered-amount</monitor>
+    <monitor x="347" precision="1" y="397" height="60" fontSize="14" width="125" display="　">urea-molecules-absorbed * 0.1</monitor>
+    <monitor x="500" precision="1" y="397" height="60" fontSize="14" width="125" display="　"><![CDATA[(count molecules with [
+  color = grey and
+  ycor <= min-pycor
+]) * 0.1]]></monitor>
+    <note x="10" y="402" backgroundDark="0" fontSize="12" width="25" markdown="false" height="25" textColorDark="-1" textColorLight="-7500403" backgroundLight="0">●</note>
+    <note x="10" y="335" backgroundDark="0" fontSize="12" width="25" markdown="false" height="25" textColorDark="-1" textColorLight="-8630108" backgroundLight="0">●</note>
+    <input x="45" multiline="false" y="329" height="60" variable="Na+" type="number" width="125">0.33</input>
+    <monitor x="196" precision="1" y="329" height="60" fontSize="14" width="125" display="　">sodium-filtered-amount</monitor>
+    <monitor x="347" precision="1" y="328" height="60" fontSize="14" width="125" display="　">sodium-molecules-absorbed</monitor>
+    <monitor x="500" precision="1" y="328" height="60" fontSize="14" width="125" display="　"><![CDATA[count molecules with [
+  color = violet and
+  ycor <= min-pycor
+]]]></monitor>
+    <note x="10" y="266" backgroundDark="0" fontSize="12" width="25" markdown="false" height="25" textColorDark="-1" textColorLight="-955883" backgroundLight="0">●</note>
+    <input x="45" multiline="false" y="260" height="60" variable="グルコース" type="number" width="125">0.1</input>
+    <monitor x="196" precision="1" y="260" height="60" fontSize="14" width="125" display="　">glucose-filtered-amount</monitor>
+    <monitor x="347" precision="1" y="259" height="60" fontSize="14" width="125" display="　">glucose-molecules-absorbed</monitor>
+    <monitor x="500" precision="1" y="259" height="60" fontSize="14" width="125" display="　"><![CDATA[count molecules with [
+  color = orange and
+  ycor <= min-pycor
+]]]></monitor>
+    <input x="45" multiline="false" y="189" height="60" variable="タンパク質" type="number" width="125">7.0</input>
+    <monitor x="196" precision="1" y="189" height="60" fontSize="14" width="125" display="　">0</monitor>
+    <monitor x="347" precision="1" y="188" height="60" fontSize="14" width="125" display="　">0</monitor>
+    <monitor x="500" precision="1" y="188" height="60" fontSize="14" width="125" display="　">0</monitor>
+    <note x="45" y="148" backgroundDark="0" fontSize="14" width="125" markdown="false" height="31" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">血しょう濃度 (%)</note>
+    <note x="196" y="148" backgroundDark="0" fontSize="14" width="125" markdown="false" height="31" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">ろ過量 (g/日)</note>
+    <note x="347" y="148" backgroundDark="0" fontSize="14" width="125" markdown="false" height="30" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">再吸収量 (g/日)</note>
+    <note x="500" y="148" backgroundDark="0" fontSize="14" width="125" markdown="false" height="31" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">排出量 (g/日)</note>
+    <button x="385" y="80" height="50" disableUntilTicks="false" forever="false" kind="Observer" width="80" display="設定">setup</button>
+    <button x="500" y="80" height="50" disableUntilTicks="true" forever="true" kind="Observer" width="85" display="実行">go</button>
+    <monitor x="181" precision="17" y="9" height="60" units="倍" fontSize="14" width="150" display="イヌリン濃縮率（固定値）">120</monitor>
+    <input x="41" multiline="false" y="9" height="60" variable="尿量" type="number" width="125">1.44</input>
+    <monitor x="356" precision="1" y="9" height="60" units="L/日" fontSize="14" width="115" display="原尿量">filtrate-volume</monitor>
+    <note x="85" y="12" backgroundDark="0" fontSize="12" width="60" markdown="false" height="25" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">(L/日)</note>
+    <chooser x="41" y="78" height="60" variable="表示モード" current="0" width="150" display="表示モード">
+      <choice type="string" value="すべて表示"></choice>
+      <choice type="string" value="グルコースのみ表示"></choice>
+      <choice type="string" value="Na＋のみ表示"></choice>
+      <choice type="string" value="尿素のみ表示"></choice>
+    </chooser>
   </widgets>
   <info><![CDATA[## WHAT IS IT?
 
