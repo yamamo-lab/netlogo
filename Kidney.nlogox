@@ -449,7 +449,7 @@ end
     <note x="720" y="21" backgroundDark="0" fontSize="14" width="70" markdown="false" height="30" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">細尿管</note>
     <note x="610" y="20" backgroundDark="0" fontSize="14" width="80" markdown="false" height="31" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">毛細血管</note>
     <note x="815" y="20" backgroundDark="0" fontSize="14" width="80" markdown="false" height="31" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">毛細血管</note>
-    <input x="45" multiline="false" y="397" height="60" variable="尿素" type="number" width="130">0.03</input>
+    <input x="45" multiline="false" y="397" height="60" variable="尿素" type="number" width="130">0.0</input>
     <monitor x="196" precision="1" y="397" height="60" fontSize="14" width="125" display="　">urea-filtered-amount</monitor>
     <monitor x="347" precision="1" y="397" height="60" fontSize="14" width="125" display="　">urea-molecules-absorbed * 0.1</monitor>
     <monitor x="500" precision="1" y="397" height="60" fontSize="14" width="125" display="　"><![CDATA[(count molecules with [
@@ -458,7 +458,7 @@ end
 ]) * 0.1]]></monitor>
     <note x="10" y="402" backgroundDark="0" fontSize="12" width="25" markdown="false" height="25" textColorDark="-1" textColorLight="-7500403" backgroundLight="0">●</note>
     <note x="10" y="335" backgroundDark="0" fontSize="12" width="25" markdown="false" height="25" textColorDark="-1" textColorLight="-8630108" backgroundLight="0">●</note>
-    <input x="45" multiline="false" y="329" height="60" variable="Na+" type="number" width="125">0.33</input>
+    <input x="45" multiline="false" y="329" height="60" variable="Na+" type="number" width="125">0.0</input>
     <monitor x="196" precision="1" y="329" height="60" fontSize="14" width="125" display="　">sodium-filtered-amount</monitor>
     <monitor x="347" precision="1" y="328" height="60" fontSize="14" width="125" display="　">sodium-molecules-absorbed</monitor>
     <monitor x="500" precision="1" y="328" height="60" fontSize="14" width="125" display="　"><![CDATA[count molecules with [
@@ -466,14 +466,14 @@ end
   ycor <= min-pycor
 ]]]></monitor>
     <note x="10" y="266" backgroundDark="0" fontSize="12" width="25" markdown="false" height="25" textColorDark="-1" textColorLight="-955883" backgroundLight="0">●</note>
-    <input x="45" multiline="false" y="260" height="60" variable="グルコース" type="number" width="125">0.1</input>
+    <input x="45" multiline="false" y="260" height="60" variable="グルコース" type="number" width="125">0.0</input>
     <monitor x="196" precision="1" y="260" height="60" fontSize="14" width="125" display="　">glucose-filtered-amount</monitor>
     <monitor x="347" precision="1" y="259" height="60" fontSize="14" width="125" display="　">glucose-molecules-absorbed</monitor>
     <monitor x="500" precision="1" y="259" height="60" fontSize="14" width="125" display="　"><![CDATA[count molecules with [
   color = orange and
   ycor <= min-pycor
 ]]]></monitor>
-    <input x="45" multiline="false" y="189" height="60" variable="タンパク質" type="number" width="125">7.0</input>
+    <input x="45" multiline="false" y="189" height="60" variable="タンパク質" type="number" width="125">0.0</input>
     <monitor x="196" precision="1" y="189" height="60" fontSize="14" width="125" display="　">0</monitor>
     <monitor x="347" precision="1" y="188" height="60" fontSize="14" width="125" display="　">0</monitor>
     <monitor x="500" precision="1" y="188" height="60" fontSize="14" width="125" display="　">0</monitor>
@@ -484,7 +484,7 @@ end
     <button x="385" y="80" height="50" disableUntilTicks="false" forever="false" kind="Observer" width="80" display="設定">setup</button>
     <button x="500" y="80" height="50" disableUntilTicks="true" forever="true" kind="Observer" width="85" display="実行">go</button>
     <monitor x="181" precision="17" y="9" height="60" units="倍" fontSize="14" width="150" display="イヌリン濃縮率（固定値）">120</monitor>
-    <input x="41" multiline="false" y="9" height="60" variable="尿量" type="number" width="125">1.44</input>
+    <input x="41" multiline="false" y="9" height="60" variable="尿量" type="number" width="125">0.0</input>
     <monitor x="356" precision="1" y="9" height="60" units="L/日" fontSize="14" width="115" display="原尿量">filtrate-volume</monitor>
     <note x="85" y="12" backgroundDark="0" fontSize="12" width="60" markdown="false" height="25" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">(L/日)</note>
     <chooser x="41" y="78" height="60" variable="表示モード" current="0" width="150" display="表示モード">
