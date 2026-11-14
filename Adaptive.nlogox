@@ -1,43 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
 <model version="NetLogo 7.0.4" snapToGrid="false">
-  <code><![CDATA[globals [death-rate reg-repro antibody-movement infected active-color]
-     ; death-rate = chance of the turtle dying
-     ; antibody-movement = how many spaces the antibody has moved
-     ; reg-repro = the chance a lymphocyte will reproduce when it is not active or a memory cell
-     ; infected = records whether antigens have been inputted
-     ; active-color = the color of the lymphocyte that responds to the antigen
-breed [lymphocytes lymphocyte]  ; creating a set of lymphocytes
-breed [antigens antigen]        ; creating a set of antigens
-breed [antibodies antibody]     ; creating a set of antibodies
-breed [measles measle]          ; creating special measles antigen
-breed [vaccines vaccine]        ; creating special vaccine antigen
-lymphocytes-own [active active-time reproduction-rate memory]
-     ; active = whether the cell is active ( 0 is no ; 1 is yes )
-     ; active-time = how much time left the cell has to be active
-     ; reproduction-rate = how fast the cell reproduces
-     ; memory = records whether the lymphocyte is a memory cell (0 is no ; 1 is yes)
-antibodies-own [energy]
-     ; energy = how many ticks the antibody has left to live
-measles-own [measles-duration]
-vaccines-own [vaccine-duration]
-     ; vaccine-duration = for how many ticks will the vaccines persist in the system
+  <code><![CDATA[globals [
+  death-rate
+  reg-repro
+  antibody-movement
+  infected
+  infected-b
+  active-color
+  active-color-b
+  ; 以下は実習条件として固定する設定値
+  antibody-effectiveness
+  antigen-load
+  vaccine-load
+  reproduction-multiplier-when-active 
+]
+; death-rate = chance of the turtle dying
+; antibody-movement = how many spaces the antibody has moved
+; reg-repro = the chance a lymphocyte will reproduce when it is not active or a memory cell
+; infected = records whether antigens have been inputted
+; active-color = the color of the lymphocyte that responds to antigen A
+; active-color-b = the color of the lymphocyte that responds to antigen B
 
+breed [lymphocytes lymphocyte]
+breed [antigens antigen]          ; antigen A
+breed [antigens-b antigen-b]      ; antigen B
+breed [antibodies antibody]
+breed [vaccines vaccine]
+
+lymphocytes-own [
+  active
+  active-time
+  reproduction-rate
+  memory
+]
+
+antibodies-own [energy target-antigen]
+
+vaccines-own [vaccine-duration]
+
+;-----------------------------------------------------------
 to setup
   clear-all
   clear-output
   ask patches [set pcolor white]
   set infected 0      ; at setup, the system is not infected with any antigens
+  set infected-b 0
+  ;--------------------------------------------------
+  ; 実習条件
+  ; 必要に応じて，以下の値を変更する
+  ;--------------------------------------------------
+
+  ; 抗体の有効性
+  ; "high"：抗体は1 tickに10パッチ移動し，8 tick生存する
+  ; "low" ：抗体は1 tickに5パッチ移動し，4 tick生存する
+  set antibody-effectiveness "high"
+
+  ; 抗原Aまたは抗原Bを1回導入するときの抗原数
+  set antigen-load 50
+
+  ; ワクチンを1回導入するときのワクチン粒子数
+  set vaccine-load 25
+
+  ; 活性化したB細胞の増殖率の倍率
+  ; 3.0の場合，通常の増殖率15％が45％になる
+  set reproduction-multiplier-when-active 3.0
+
+  ;--------------------------------------------------
+  
   set death-rate 15   ; values fit to give best response, no inherent meaning to these rates
   set reg-repro 15
-  set active-color one-of base-colors        ;set active color to a random lymphocyte color
+ 　set active-color yellow  ; 抗原Aに特異的なB細胞の色
+ 　set active-color-b pink ; 抗原Bに特異的なB細胞の色
   set-default-shape lymphocytes "circle"     ; lymphocytes are circles
   set-default-shape antigens "monster"       ; antigens are monsters
-  set-default-shape measles "monster"        ; measles are monsters, big red ones
+  set-default-shape antigens-b "monster"
   set-default-shape vaccines "monster"       ; vaccines are greyed-out monsters
   set-default-shape antibodies "Y"           ; antibodies are Y-shaped
   create-lymphocytes 250  ; create the lymphocytes, then initialize their variables
   [
-    set color one-of base-colors
+    set color one-of remove red base-colors ; 赤色は抗体Bに使用するため，B細胞の色には使わない
     set active 0 ; all lymphocytes are initially inactive
     set active-time -1
     set reproduction-rate reg-repro ; all lymphocytes are initially inactive, so reproduce at regular rate
@@ -48,7 +89,7 @@ to setup
   ]
   reset-ticks
 end
-
+;----------------------------------------------------------------------
 to go
   if not any? turtles [ stop ]
   replace-extinct
@@ -56,6 +97,10 @@ to go
     move
     antigen-reproduce
   ]
+  ask antigens-b [
+   move
+   antigen-reproduce
+ ]
   ask lymphocytes [
     bind
     activated
@@ -68,40 +113,50 @@ to go
     set energy energy - 1
     antibody-death
   ]
-  measles-death
   vaccine-death
   antigen-extinct
+  antigen-b-extinct
   tick
+  if ticks = 50 [  ; 50 tickで一度停止する
+    stop
+  ]
+  ; ここで2回目の抗原を入れ，再び「実行」を押す
+  if ticks >= 100 [
+   stop
+  ]
  end
-
+;-----------------------------------------------------------
 to replace-extinct           ; this is a "rescue effect", if any lymphocyte types (colors) go extinct we add one more to the population
   let counter 5
   while [counter < 140]      ; check all the colors
   [
-    if count lymphocytes with [color = counter] = 0
-  [
-      create-lymphocytes 1  ; create the replacement lymphocyte, then initialize its variables
-      [
-        set color counter
-        set active-time -1
-        set active 0
-        set reproduction-rate reg-repro
-        set size 1.5
-        set label-color blue - 2
-        setxy random-xcor random-ycor
-        ask n-of 1 lymphocytes [ die ]   ; kill a random lympohcyte to make up for the replacement
-      ]
+; 赤色は抗体Bに使用するため，B細胞としては補充しない
+if counter != red [
+  if count lymphocytes with [color = counter] = 0 [
+    create-lymphocytes 1 [
+      set color counter
+      set active-time -1
+      set active 0
+      set reproduction-rate reg-repro
+      set size 1.5
+      set label-color blue - 2
+      setxy random-xcor random-ycor
+      set memory 0
+
+      ask n-of 1 lymphocytes [ die ]
+    ]
   ]
+]   
   set counter counter + 10
 ]
 end
-
+;--------------------------------------------------------
 to move  ; antigen and lymphocyte procedure
   rt random 50
   lt random 50
   fd 1
 end
-
+;----------------------------------------------------;
 to antigen-reproduce
    if random 100 < 20 and color != grey   ;; and statement keeps grey "vaccine antigens" from reproducing
     [
@@ -109,16 +164,29 @@ to antigen-reproduce
     ]
 end
 
-to bind                                          ; active-color lymphocytes are activated by the antigen
- if color = active-color[
-   if (one-of antigens in-radius 1 != nobody) or (one-of vaccines in-radius 1 != nobody)
-   [
-     set active 1
-     set active-time 10   ;; length of typical cell lifespan if death rate is 10
-   ]
-  ]
-end
+;----------------------------------------------------
+; active-color lymphocytes are activated by the antigen
+to bind
 
+  ; 抗原Aまたはワクチンに反応するB細胞
+  if color = active-color [
+    if (one-of antigens in-radius 1 != nobody)
+       or (one-of vaccines in-radius 1 != nobody) [
+      set active 1
+      set active-time 10
+    ]
+  ]
+
+  ; 抗原Bに反応するB細胞
+  if color = active-color-b [
+    if one-of antigens-b in-radius 1 != nobody [
+      set active 1
+      set active-time 10
+    ]
+  ]
+
+end 
+;---------------------------------------------------------------
 to activated
   if active-time = 0                                 ; kills activated after time is up
     [
@@ -128,48 +196,81 @@ to activated
   if active = 1
   [
     set reproduction-rate (reproduction-multiplier-when-active * reg-repro) ; start rapid reproduction
-    set size 2               ; increase size
+    set size 1.5               ; increase size
     set shape "bold-circle"  ; outline circle
     hatch-antibodies 2       ; create antibodies
-    [
-      set color black
-      rt random-float 360 fd 1  ; randomly pick a direction and move forward
+     [
+      ifelse color = active-color
+      [
+        set target-antigen 1
+        set color black     ; 抗原Aに対する抗体は黒
+      ]
+      [
+        set target-antigen 2
+        set color red       ; 抗原Bに対する抗体は赤
+      ]
+
+      rt random-float 360 
+      fd 1
+
       if antibody-effectiveness = "high"
       [
-          set energy 8
+        ; 抗体の寿命（tick）
+        ; 値を大きくすると，作られた抗体が長く残る
+        set energy 15
       ]
 
       if antibody-effectiveness = "low"
       [
-        set energy 4 ; for antibodies, energy tracks how many ticks the antibodies have left to live
+        set energy 4
       ]
     ]
    set active-time active-time - 1    ;; counts back down to inactivity
   ]
 end
-
+;-------------------------------------------------------------
 to reproduce  ; determine if the lymphocyte reproduces
 
  if random 100 < reproduction-rate
   [ ifelse memory = 1
     [
       hatch 1 [
-        set shape "M-circle"
-        rt random-float 360 fd 1]
+        ifelse random-float 1 < 0.2
+        [  
+          set shape "M-circle"
+          set size 2.0
+        ]
+        [ 
+          set shape "circle"
+          set size 1.5
+        ]
+
+        rt random-float 360
+        fd 1
+      ]
     ]
     [
        ifelse active = 1 ; if active, produce both a memory cell and an active cell ; else, produce regular cell
         [
-                  hatch-lymphocytes 1 [ set shape "M-circle"
-                  set color active-color
-                  set active 0
-                  set reproduction-rate 2
-                  set size 2.5  ; easier to see
-                  set label-color blue - 2
-                  set memory 1
-                  rt random-float 360 fd 1 ]
+           hatch-lymphocytes 1 [ 
+            ifelse random-float 1 < 0.2
+            　[
+              　set shape "M-circle" 
+               set size 2.0 
+            ]
+            [ 
+              set shape "circle" 
+              set size 1.5
+            ]
 
-                  hatch 1 [ rt random-float 360 fd 1]
+            set active 0
+            set reproduction-rate 2
+            set label-color blue - 2
+            set memory 1
+            rt random-float 360
+            fd 1
+          ]
+          hatch 1 [ rt random-float 360 fd 1]
         ]
         [
             ifelse count lymphocytes < 235
@@ -183,7 +284,7 @@ to reproduce  ; determine if the lymphocyte reproduces
     ]
   ]
 end
-
+;-------------------------------------------------------------
 to lymph-death  ; determine if the lymphocyte dies
   if memory = 0 and random 100 < death-rate
       [
@@ -194,7 +295,7 @@ to lymph-death  ; determine if the lymphocyte dies
     die
   ]
 end
-
+;----------------------------------------------------
 to antibody-move  ; the speed (distance moved each time step) ends up being a measure of potency of each activated cell
   set antibody-movement 0
   if antibody-effectiveness = "high"
@@ -215,27 +316,31 @@ to antibody-move  ; the speed (distance moved each time step) ends up being a me
      ]
   ]
 end
-
+;----------------------------------------------------
 to antibody-death
   if energy < 1
   [ die ]
 end
-
+;--------------------------------------------
 to kill-antigen
-  let prey one-of antigens-here
-  if prey != nobody
-  [ask prey[die]]
-end
-
-to measles-death
-  ask measles
-  [
-    if measles-duration < 1
-     [  die  ]
-     set measles-duration measles-duration - 1
+  ; 抗原Aに対する抗体
+  if target-antigen = 1 [
+    let prey one-of antigens-here
+    if prey != nobody [
+      ask prey [ die ]
+    ]
   ]
-end
 
+  ; 抗原Bに対する抗体
+  if target-antigen = 2 [
+    let prey one-of antigens-b-here
+    if prey != nobody [
+      ask prey [ die ]
+    ]
+  ]
+
+end
+;---------------------------------------------
 to vaccine-death
   ask vaccines
   [
@@ -244,17 +349,25 @@ to vaccine-death
     set vaccine-duration vaccine-duration - 1
   ]
 end
-
+;-----------------------------------------------
 to antigen-extinct
   if (count antigens = 0) and (infected = 1)
   [
-     output-type "antigen clearance time "  output-print ticks
+     output-type "抗原A　排除時刻 "  output-print ticks
     set infected 0
   ]
 end
-
+;---------------------------------------------
+to antigen-b-extinct
+  if (count antigens-b = 0) and (infected-b = 1) [
+    output-type "抗原B 排除時刻 "
+    output-print ticks
+    set infected-b 0
+  ]
+end
+;---------------------------------------------
 to insert-antigens                               ; create an infection every button push
-  output-type "antigen infection time "  output-print ticks
+  output-type "抗原A　感染時刻 "  output-print ticks
   set infected 1 ; noting that antigens have been put into the cell
     create-antigens antigen-load
     [
@@ -265,28 +378,22 @@ to insert-antigens                               ; create an infection every but
     ]
 
 end
+;----------------------------------------------
+to infect-antigen-b
+  output-type "抗原B 感染時刻 "
+  output-print ticks
+  
+  set infected-b 1
 
-to infect-measles
-  output-type "measles infection time "  output-print ticks
-   create-measles 1
-    [
-     set color red
-     set size 50
-     set label-color blue - 2
-     setxy 0 0
-     set measles-duration 5
-    ]
-
-  ask lymphocytes
-      [
-        if random 100 < 95
-        [ die ]
-      ]
-
+  create-antigens-b antigen-load [
+    set color red
+    set size 2
+    setxy random-xcor random-ycor
+  ]
 end
-
+;----------------------------------------------
 to insert-vaccine
-  output-type "vaccine injection time "  output-print ticks
+  output-type "ワクチンA　接種時刻 "  output-print ticks
   create-vaccines vaccine-load
     [
      set color grey
@@ -298,9 +405,7 @@ to insert-vaccine
 end]]></code>
   <widgets>
     <view x="613" wrappingAllowedX="true" y="10" frameRate="30.0" minPycor="-25" height="484" showTickCounter="true" patchSize="9.412" fontSize="14" wrappingAllowedY="true" width="484" tickCounterLabel="ticks" maxPycor="25" updateMode="1" maxPxcor="25" minPxcor="-25"></view>
-    <button x="11" y="10" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="77" display="setup">setup</button>
-    <button x="90" y="10" height="40" disableUntilTicks="true" forever="true" kind="Observer" width="80" display="go/pause">go</button>
-    <plot x="273" autoPlotX="true" yMax="100.0" autoPlotY="true" yAxis="pop." y="10" xMin="0.0" height="175" legend="false" xMax="100.0" yMin="0.0" width="323" xAxis="time" display="Lymphocyte populations">
+    <plot x="273" autoPlotX="false" yMax="2000.0" autoPlotY="false" yAxis="pop." y="10" xMin="0.0" height="175" legend="false" xMax="200.0" yMin="0.0" width="323" xAxis="時間" display="B細胞濃度（相対値）">
       <setup></setup>
       <update></update>
       <pen interval="1.0" mode="0" display="pen5" color="-7500403" legend="true">
@@ -360,34 +465,37 @@ end]]></code>
         <update>plot count lymphocytes with [color = 135]</update>
       </pen>
     </plot>
-    <plot x="273" autoPlotX="true" yMax="10.0" autoPlotY="true" yAxis="pop." y="190" xMin="0.0" height="175" legend="false" xMax="10.0" yMin="0.0" width="323" xAxis="time" display="Antibody Population">
-      <setup></setup>
-      <update></update>
-      <pen interval="1.0" mode="0" display="antibodies" color="-16777216" legend="true">
-        <setup></setup>
-        <update>plot count antibodies</update>
-      </pen>
-    </plot>
-    <plot x="273" autoPlotX="true" yMax="10.0" autoPlotY="true" yAxis="pop." y="370" xMin="0.0" height="175" legend="false" xMax="10.0" yMin="0.0" width="324" xAxis="time" display="Antigen Population">
+    <button x="11" y="10" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="77" display="セットアップ">setup</button>
+    <button x="90" y="10" height="40" disableUntilTicks="true" forever="true" kind="Observer" width="124" display="実行/一時停止">go</button>
+    <button x="7" y="120" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="79" display="抗原A">insert-antigens</button>
+    <button x="90" y="120" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="87" display="ワクチンA">insert-vaccine</button>
+    <button x="179" y="120" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="84" display="抗原B">infect-antigen-b</button>
+    <note x="15" y="193" backgroundDark="0" fontSize="12" width="150" markdown="false" height="18" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">Output Window:</note>
+    <output x="9" y="218" height="193" fontSize="13" width="253"></output>
+    <plot x="275" autoPlotX="false" yMax="140.0" autoPlotY="false" yAxis="相対値" y="266" xMin="0.0" height="229" legend="false" xMax="100.0" yMin="0.0" width="324" xAxis="時間" display="抗原量">
       <setup></setup>
       <update></update>
       <pen interval="1.0" mode="0" display="antigens" color="-16777216" legend="true">
         <setup></setup>
         <update>plot count antigens</update>
       </pen>
+      <pen interval="1.0" mode="0" display="angens b" color="-2674135" legend="true">
+        <setup></setup>
+        <update>plot count antigens-b</update>
+      </pen>
     </plot>
-    <button x="181" y="304" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="84" display="MEASLES">infect-measles</button>
-    <output x="11" y="380" height="133" fontSize="13" width="253"></output>
-    <slider x="10" step="5" y="135" max="100" width="255" display="antigen-load" height="50" min="5" direction="Horizontal" default="50.0" variable="antigen-load"></slider>
-    <slider x="11" step="0.5" y="248" max="5" width="255" display="reproduction-multiplier-when-active" height="50" min="1" direction="Horizontal" default="3.0" variable="reproduction-multiplier-when-active"></slider>
-    <button x="11" y="304" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="79" display="ANTIGENS">insert-antigens</button>
-    <slider x="11" step="5" y="192" max="400" width="255" display="vaccine-load" height="50" min="5" direction="Horizontal" default="200.0" variable="vaccine-load"></slider>
-    <button x="92" y="304" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="87" display="VACCINE">insert-vaccine</button>
-    <chooser x="11" y="69" height="60" variable="antibody-effectiveness" current="0" width="166" display="antibody-effectiveness">
-      <choice type="string" value="low"></choice>
-      <choice type="string" value="high"></choice>
-    </chooser>
-    <note x="11" y="357" backgroundDark="0" fontSize="12" width="150" markdown="false" height="18" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">Output Window:</note>
+    <plot x="272" autoPlotX="false" yMax="8000.0" autoPlotY="false" yAxis="相対値" y="6" xMin="0.0" height="252" legend="false" xMax="100.0" yMin="0.0" width="323" xAxis="時間" display="抗体量">
+      <setup></setup>
+      <update></update>
+      <pen interval="1.0" mode="0" display="抗体A" color="-16777216" legend="true">
+        <setup></setup>
+        <update>plot count antibodies with [target-antigen = 1]</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="抗体B" color="-2674135" legend="true">
+        <setup></setup>
+        <update>plot count antibodies with [target-antigen = 2]</update>
+      </pen>
+    </plot>
   </widgets>
   <info><![CDATA[## WHAT IS IT?
 
