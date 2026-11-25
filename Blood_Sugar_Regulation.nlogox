@@ -47,7 +47,9 @@ globals [
   glucagon-display
   
   計算用インスリン感受性
-  計算用インスリン分泌能  
+  計算用インスリン分泌能 
+  setup-stage
+  setup-count
   
 ]
 
@@ -67,7 +69,9 @@ insulins-own [ lifetime ]
 glucagons-own [ lifetime ]
 
 ;-------------- set up ---------------------------------------------------------
-to setup
+to setup-initialize
+  ;reset-timer  
+
   ; 感受性または分泌能が100%以外なら120分ならす
   if (インスリン感受性 != 100 or インスリン分泌能 != 100) [
     equilibrate-120
@@ -147,52 +151,98 @@ to setup
   ; keep track of the body's fuel
   set total-glucose (count glucoses) + sum ([glucose-store] of liver-cells)
 
-  ; 食事なしでモデルを安定化
-	stabilize
+  set setup-count 0
+  set setup-stage 1
 
-	; 安定状態を正常時の基準値とする
-	set initial-glucose-count count glucoses
-	set initial-insulin-count count insulins
-	set initial-glucagon-count count glucagons
-	set initial-liver-store sum [glucose-store] of liver-cells
-  set glucagon-display 150
+  ;print (word "setup total: " timer " 秒")
 
-	set eating? false
-	set eat-time 0
-  
-  ; Restore the values selected by the user
-  set 計算用インスリン感受性 インスリン感受性
-  set 計算用インスリン分泌能 インスリン分泌能
-
-  ; 感受性または分泌能が100%以外なら120分ならす
-  ifelse (インスリン感受性 != 100 or インスリン分泌能 != 100) [
-    equilibrate-120
-  ] [
-    reset-ticks
-  ]
- 
 end
+;---------------------------------------------------------------
+to setup
 
+  ; 初期化
+  if setup-stage = 0 [
+    setup-initialize
+  ]
+
+  ; 正常条件でのならし計算
+  if setup-stage = 1 [
+
+    stabilize
+    set setup-count setup-count + 1
+
+    if setup-count >= 20 [
+
+      ; 正常時の濃度換算用の基準値
+      set initial-glucose-count count glucoses
+      set initial-insulin-count count insulins
+      set initial-glucagon-count count glucagons
+      set initial-liver-store sum [glucose-store] of liver-cells
+
+      set glucagon-display 150
+
+      set eating? false
+      set eat-time 0
+
+      ; スライダーの設定値を反映
+      set 計算用インスリン感受性 インスリン感受性
+      set 計算用インスリン分泌能 インスリン分泌能
+
+      ; 正常条件の場合はセットアップ終了
+      if (計算用インスリン感受性 = 100 and
+          計算用インスリン分泌能 = 100) [
+
+        set setup-stage 0
+        reset-ticks
+        stop
+      ]
+
+      ; 設定条件でのならし計算に移行
+      set setup-count 0
+      set setup-stage 2
+    ]
+  ]
+
+  ; 設定条件でのならし計算
+  if setup-stage = 2 [
+
+    stabilize
+    set setup-count setup-count + 1
+
+    if setup-count >= 20 [
+
+      set glucagon-display glucagon-concentration
+
+      set setup-stage 0
+
+      clear-all-plots
+      reset-ticks
+      stop
+    ]
+  ]
+
+end
 ;--------------- stabilize ------------------------------------------
 to stabilize
-  repeat 20 [
-    ask liver-cells [ adjust-glucose ]
-    ask pancreatic-cells [ adjust-hormones ]
 
-    metabolize-glucose
-    signal-degradation
+  ask liver-cells [ adjust-glucose ]
+  ask pancreatic-cells [ adjust-hormones ]
 
-    ask insulins [ move ]
-    ask glucagons [ move ]
-    ask glucoses [ move ]
+  metabolize-glucose
+  signal-degradation
 
-    set total-glucose
-      (count glucoses) + sum [glucose-store] of liver-cells
-  ]
+  ask insulins [ move ]
+  ask glucagons [ move ]
+  ask glucoses [ move ]
+
+  set total-glucose
+    (count glucoses) + sum [glucose-store] of liver-cells
+
 end
 
 ;--------------- go ------------------------------------
 to go
+  ;print "go start"
   if (total-glucose = 0) [
     user-message "The body ran out of glucose."
     stop
@@ -404,18 +454,22 @@ to adjust-glucose
       set glucose-store 0
     ]
   ]
+  
   ; If there is more insulin signal than glucagon signal, sequester glucose.
   if net-signal < 0 [
-    ifelse (count glucoses >= abs net-signal) [
-      ; If there's a lot of blood glucose, sequester what you need (net-signal < 0).
-      set glucose-store glucose-store - net-signal
-      ask n-of abs net-signal glucoses [ die ]
+  let uptake min (list (abs net-signal) (count glucoses))
+
+  if uptake > 0 [
+    set glucose-store glucose-store + uptake
+
+    ifelse uptake = 1 [
+      ask one-of glucoses [ die ]
     ] [
-      ; If there's not ehough blood glucose, sequester as much as possible.
-      set glucose-store glucose-store + count glucoses
-      ask glucoses [ die ]
+      ask n-of uptake glucoses [ die ]
     ]
   ]
+]
+ 
 end
 
 ;------------------- adjust hormones --------------------------------------------------------------
@@ -588,7 +642,7 @@ end
 
 ;----------- シミュレーション開始 ----------------
 to run-simulation
-
+  if setup-stage != 0 [ stop ]
   ; 300分に達したら停止
   if ticks >= 50 [ stop ]
 
@@ -659,10 +713,10 @@ end
     <monitor x="25" precision="0" y="300" height="60" fontSize="11" width="185" display="血糖濃度(mg/100mL)">blood-glucose-mgdl</monitor>
     <monitor x="20" precision="0" y="230" height="60" fontSize="10" width="190" display="時間経過(分)">elapsed-minutes</monitor>
     <slider x="20" step="25" y="170" max="100" width="190" display="インスリン分泌能" height="50" min="25" direction="Horizontal" default="100.0" variable="インスリン分泌能" units="%"></slider>
-    <slider x="20" step="25" y="110" max="100" width="190" display="インスリン感受性" height="50" min="25" direction="Horizontal" default="100.0" variable="インスリン感受性" units="%"></slider>
-    <switch x="25" y="60" height="40" on="false" variable="食事" width="185" display="食事"></switch>
-    <button x="15" y="5" height="50" disableUntilTicks="false" forever="false" kind="Observer" width="95" display="セットアップ">setup</button>
+    <slider x="20" step="25" y="110" max="100" width="190" display="インスリン感受性" height="50" min="25" direction="Horizontal" default="25.0" variable="インスリン感受性" units="%"></slider>
+    <switch x="25" y="60" height="40" on="true" variable="食事" width="185" display="食事"></switch>
     <button x="115" y="5" height="50" disableUntilTicks="true" forever="true" kind="Observer" width="95" display="実行">run-simulation</button>
+    <button x="15" y="5" height="50" disableUntilTicks="false" forever="true" kind="Observer" width="95" display="セットアップ">setup</button>
   </widgets>
   <info># 概要
 このモデルは、血糖濃度がインスリンとグルカゴンの作用によって一定範囲に保たれるしくみをシミュレーションするためのエージェントベースモデルである。
