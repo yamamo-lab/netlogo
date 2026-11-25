@@ -82,7 +82,7 @@ to setup-initialize
   set 食事 saved-meal
 
   ; Fixed parameters
-	set metabolic-rate 70
+	set metabolic-rate 28 ;70 **************************
 	set glucose-sensitivity 100
 	set glucagon-sensitivity 0.75
   
@@ -101,7 +101,7 @@ to setup-initialize
   set glucose-baseline 3 ; Controls the normal blood glucose level.
   set hormone-half-life 2.33 ; Corresponds to 14 minutes, roughly twice insulin.
   set hormone-mean-life hormone-half-life / ln 2 ; From exponential distribution.
-  set meal-size 36000 ; Total glucose particles supplied by one meal (adjustable for teaching).
+  set meal-size 14579 ;36000 ; Total glucose particles supplied by one meal (adjustable for teaching). ***********
   set meal-length 70 ; 70 ticks x 6 min = 420 min, following the time range of Rizza Fig. 3.
   set basal-glucagon-secretion 0.8
 
@@ -743,8 +743,8 @@ end
     <monitor x="25" precision="0" y="300" height="60" fontSize="11" width="185" display="血糖濃度(mg/100mL)">blood-glucose-mgdl</monitor>
     <monitor x="20" precision="0" y="230" height="60" fontSize="10" width="190" display="時間経過(分)">elapsed-minutes</monitor>
     <slider x="20" step="25" y="170" max="100" width="190" display="インスリン分泌能" height="50" min="25" direction="Horizontal" default="100.0" variable="インスリン分泌能" units="%"></slider>
-    <slider x="20" step="25" y="110" max="100" width="190" display="インスリン感受性" height="50" min="25" direction="Horizontal" default="25.0" variable="インスリン感受性" units="%"></slider>
-    <switch x="25" y="60" height="40" on="false" variable="食事" width="185" display="食事"></switch>
+    <slider x="20" step="25" y="110" max="100" width="190" display="インスリン感受性" height="50" min="25" direction="Horizontal" default="100.0" variable="インスリン感受性" units="%"></slider>
+    <switch x="25" y="60" height="40" on="true" variable="食事" width="185" display="食事"></switch>
     <button x="115" y="5" height="50" disableUntilTicks="true" forever="true" kind="Observer" width="95" display="実行">run-simulation</button>
     <button x="15" y="5" height="50" disableUntilTicks="false" forever="true" kind="Observer" width="95" display="セットアップ">setup</button>
   </widgets>
