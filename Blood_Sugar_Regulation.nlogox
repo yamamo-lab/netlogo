@@ -68,6 +68,10 @@ glucagons-own [ lifetime ]
 
 ;-------------- set up ---------------------------------------------------------
 to setup
+  ; 感受性または分泌能が100%以外なら120分ならす
+  if (インスリン感受性 != 100 or インスリン分泌能 != 100) [
+    equilibrate-120
+  ]  
 
   let saved-meal 食事
   clear-all
@@ -157,10 +161,16 @@ to setup
 	set eat-time 0
   
   ; Restore the values selected by the user
-	set 計算用インスリン感受性 インスリン感受性
-	set 計算用インスリン分泌能 インスリン分泌能
+  set 計算用インスリン感受性 インスリン感受性
+  set 計算用インスリン分泌能 インスリン分泌能
 
-  reset-ticks
+  ; 感受性または分泌能が100%以外なら120分ならす
+  ifelse (インスリン感受性 != 100 or インスリン分泌能 != 100) [
+    equilibrate-120
+  ] [
+    reset-ticks
+  ]
+ 
 end
 
 ;--------------- stabilize ------------------------------------------
@@ -575,25 +585,23 @@ end
 ;----------- シミュレーション開始 ----------------
 to run-simulation
 
-  setup
+  ; 300分に達したら停止
+  if ticks >= 50 [ stop ]
 
-  ; 感受性または分泌能が100%以外なら120分ならす
-  if (インスリン感受性 != 100 or インスリン分泌能 != 100) [
-    equilibrate-120
-  ] 
-  
-  ; 食事ありの場合、ここから食事を開始
-  if 食事 [
-    eat
+  ; 最初のtickで食事を開始
+  if ticks = 0 [
+    if 食事 [
+      eat
+    ]
   ]
 
-  ; 300分まで実行（1 tick = 6分）
-  repeat 50 [
-    go
-  ]
+  ; 1 tick分のシミュレーション
+  go
+
+  ; 300分に達したら停止
+  if ticks >= 50 [ stop ]
 
 end
-
 ;*****************************************************************
 ; Copyright 2017 Uri Wilensky.
 ; Original model: Woods, P. and Wilensky, U. (2017).
@@ -618,14 +626,6 @@ end
 ]]></code>
   <widgets>
     <view x="655" wrappingAllowedX="true" y="360" frameRate="30.0" minPycor="-16" height="42" showTickCounter="false" patchSize="1.0" fontSize="10" wrappingAllowedY="true" width="41" tickCounterLabel="ticks" maxPycor="16" updateMode="1" maxPxcor="16" minPxcor="-16"></view>
-    <slider x="20" step="25" y="65" max="100" width="190" display="インスリン感受性" height="50" min="25" direction="Horizontal" default="100.0" variable="インスリン感受性" units="%"></slider>
-    <slider x="20" step="25" y="125" max="100" width="190" display="インスリン分泌能" height="50" min="25" direction="Horizontal" default="100.0" variable="インスリン分泌能" units="%"></slider>
-    <button x="95" y="5" height="50" disableUntilTicks="false" forever="false" kind="Observer" width="115" display="実行">run-simulation</button>
-    <switch x="20" y="5" height="50" on="false" variable="食事" width="70" display="食事"></switch>
-    <monitor x="20" precision="0" y="185" height="60" fontSize="10" width="190" display="時間経過(分)">elapsed-minutes</monitor>
-    <monitor x="25" precision="0" y="255" height="60" fontSize="11" width="185" display="血糖濃度(mg/100mL)">blood-glucose-mgdl</monitor>
-    <monitor x="25" precision="0" y="325" height="60" fontSize="10" width="185" display="インスリン濃度(相対値)">insulin-concentration</monitor>
-    <monitor x="25" precision="0" y="395" height="60" fontSize="10" width="185" display="グルカゴン濃度(ng/L)">glucagon-concentration</monitor>
     <plot x="235" autoPlotX="false" yMax="350.0" autoPlotY="false" yAxis="mg/100mL" y="5" xMin="0.0" height="165" legend="false" xMax="300.0" yMin="0.0" width="505" xAxis="時間 (分)" display="血糖濃度">
       <setup></setup>
       <update></update>
@@ -650,6 +650,15 @@ end
         <update>plotxy elapsed-minutes glucagon-display</update>
       </pen>
     </plot>
+    <monitor x="25" precision="0" y="450" height="60" fontSize="10" width="185" display="グルカゴン濃度(ng/L)">glucagon-concentration</monitor>
+    <monitor x="25" precision="0" y="375" height="60" fontSize="10" width="185" display="インスリン濃度(相対値)">insulin-concentration</monitor>
+    <monitor x="25" precision="0" y="300" height="60" fontSize="11" width="185" display="血糖濃度(mg/100mL)">blood-glucose-mgdl</monitor>
+    <monitor x="20" precision="0" y="230" height="60" fontSize="10" width="190" display="時間経過(分)">elapsed-minutes</monitor>
+    <slider x="20" step="25" y="170" max="100" width="190" display="インスリン分泌能" height="50" min="25" direction="Horizontal" default="100.0" variable="インスリン分泌能" units="%"></slider>
+    <slider x="20" step="25" y="110" max="100" width="190" display="インスリン感受性" height="50" min="25" direction="Horizontal" default="25.0" variable="インスリン感受性" units="%"></slider>
+    <switch x="25" y="60" height="40" on="true" variable="食事" width="185" display="食事"></switch>
+    <button x="15" y="5" height="50" disableUntilTicks="false" forever="false" kind="Observer" width="95" display="セットアップ">setup</button>
+    <button x="115" y="5" height="50" disableUntilTicks="true" forever="true" kind="Observer" width="95" display="実行">run-simulation</button>
   </widgets>
   <info># 概要
 このモデルは、血糖濃度がインスリンとグルカゴンの作用によって一定範囲に保たれるしくみをシミュレーションするためのエージェントベースモデルである。
