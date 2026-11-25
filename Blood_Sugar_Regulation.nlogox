@@ -654,7 +654,7 @@ end
     <monitor x="25" precision="0" y="375" height="60" fontSize="10" width="185" display="インスリン濃度(相対値)">insulin-concentration</monitor>
     <monitor x="25" precision="0" y="300" height="60" fontSize="11" width="185" display="血糖濃度(mg/100mL)">blood-glucose-mgdl</monitor>
     <monitor x="20" precision="0" y="230" height="60" fontSize="10" width="190" display="時間経過(分)">elapsed-minutes</monitor>
-    <slider x="20" step="25" y="170" max="100" width="190" display="インスリン分泌能" height="50" min="25" direction="Horizontal" default="25.0" variable="インスリン分泌能" units="%"></slider>
+    <slider x="20" step="25" y="170" max="100" width="190" display="インスリン分泌能" height="50" min="25" direction="Horizontal" default="100.0" variable="インスリン分泌能" units="%"></slider>
     <slider x="20" step="25" y="110" max="100" width="190" display="インスリン感受性" height="50" min="25" direction="Horizontal" default="100.0" variable="インスリン感受性" units="%"></slider>
     <switch x="25" y="60" height="40" on="false" variable="食事" width="185" display="食事"></switch>
     <button x="15" y="5" height="50" disableUntilTicks="false" forever="false" kind="Observer" width="95" display="セットアップ">setup</button>
