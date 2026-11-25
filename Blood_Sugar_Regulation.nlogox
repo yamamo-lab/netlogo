@@ -398,17 +398,23 @@ to move
   lt random 90
   fd 1
 end
-
-; Observer procedure
+;------------ signal-degradation -------------
 to signal-degradation
+
   ask insulins [
     set lifetime lifetime - 1
-    if (lifetime <= 0) [ die ]
   ]
+  ask insulins with [ lifetime <= 0 ] [
+    die
+  ]
+
   ask glucagons [
     set lifetime lifetime - 1
-    if (lifetime <= 0) [ die ]
   ]
+  ask glucagons with [ lifetime <= 0 ] [
+    die
+  ]
+
 end
 
 ; Observer procedure
