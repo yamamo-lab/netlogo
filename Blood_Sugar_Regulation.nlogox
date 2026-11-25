@@ -225,18 +225,42 @@ end
 ;--------------- stabilize ------------------------------------------
 to stabilize
 
+  reset-timer
+
   ask liver-cells [ adjust-glucose ]
+  let t1 timer
+
   ask pancreatic-cells [ adjust-hormones ]
+  let t2 timer
 
   metabolize-glucose
+  let t3 timer
+
   signal-degradation
+  let t4 timer
 
   ask insulins [ move ]
   ask glucagons [ move ]
   ask glucoses [ move ]
+  let t5 timer
 
   set total-glucose
     (count glucoses) + sum [glucose-store] of liver-cells
+  let t6 timer
+
+  if setup-count = 9 [
+    print (word "setup-stage: " setup-stage)
+    print (word "肝細胞: " t1)
+    print (word "膵細胞: " (t2 - t1))
+    print (word "代謝: " (t3 - t2))
+    print (word "分解: " (t4 - t3))
+    print (word "移動: " (t5 - t4))
+    print (word "集計: " (t6 - t5))
+    print (word "合計: " t6)
+    print (word "グルコース粒子数: " count glucoses)
+    print (word "インスリン粒子数: " count insulins)
+    print (word "グルカゴン粒子数: " count glucagons)
+  ]
 
 end
 
@@ -714,7 +738,7 @@ end
     <monitor x="20" precision="0" y="230" height="60" fontSize="10" width="190" display="時間経過(分)">elapsed-minutes</monitor>
     <slider x="20" step="25" y="170" max="100" width="190" display="インスリン分泌能" height="50" min="25" direction="Horizontal" default="100.0" variable="インスリン分泌能" units="%"></slider>
     <slider x="20" step="25" y="110" max="100" width="190" display="インスリン感受性" height="50" min="25" direction="Horizontal" default="25.0" variable="インスリン感受性" units="%"></slider>
-    <switch x="25" y="60" height="40" on="true" variable="食事" width="185" display="食事"></switch>
+    <switch x="25" y="60" height="40" on="false" variable="食事" width="185" display="食事"></switch>
     <button x="115" y="5" height="50" disableUntilTicks="true" forever="true" kind="Observer" width="95" display="実行">run-simulation</button>
     <button x="15" y="5" height="50" disableUntilTicks="false" forever="true" kind="Observer" width="95" display="セットアップ">setup</button>
   </widgets>
