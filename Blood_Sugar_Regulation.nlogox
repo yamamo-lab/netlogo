@@ -541,7 +541,11 @@ to-report random-binomial [n p]
   if (p < 0) or (p > 1) [
     error "Probability p must be between 0 and 1."
   ]
-
+  
+; 計算不要な場合は直接結果を返す
+  if n = 0 [ report 0 ]
+  if p = 0 [ report 0 ]
+  if p = 1 [ report n ]
   ; Sum the number of successes in n Bernoulli trials with success probability p.
   report sum n-values n [random-bernoulli p]
 end
